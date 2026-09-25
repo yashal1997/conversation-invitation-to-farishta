@@ -1,0 +1,45 @@
+from pathlib import Path
+
+html = r'''<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Invitation Flow</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;background:radial-gradient(circle at 15% 10%,#fff 0,#f8f5ff 32%,#f3f7ff 70%,#eef2f8 100%);color:#172033}.wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:clamp(16px,4vw,48px)}.card{width:min(760px,100%);background:rgba(255,255,255,.94);border:1px solid rgba(230,234,240,.9);border-radius:28px;box-shadow:0 28px 80px rgba(45,35,80,.12);overflow:hidden;backdrop-filter:blur(12px)}.top{padding:30px 34px 18px;background:linear-gradient(135deg,rgba(255,255,255,.98),rgba(248,246,255,.9))}.brand{font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#7a6b9b}.progress{display:flex;gap:7px;margin-top:20px}.dot{height:5px;flex:1;border-radius:99px;background:#e8eaf1;transition:.25s}.dot.active{background:#7562a8}.body{padding:34px;min-height:410px}.eyebrow{font-size:13px;font-weight:700;letter-spacing:.04em;color:#8a7ba8;margin-bottom:10px}.title{font-size:clamp(27px,5vw,38px);line-height:1.12;letter-spacing:-.03em;margin:0 0 10px}.sub{color:#667085;line-height:1.65;margin:0 0 28px}.options{display:grid;gap:13px}.option{border:1px solid #e1e3eb;border-radius:17px;padding:18px;cursor:pointer;transition:transform .18s,border-color .18s,box-shadow .18s;background:#fff}.option:hover{border-color:#a99ac9;transform:translateY(-2px);box-shadow:0 8px 24px rgba(70,50,110,.08)}.option.selected{border-color:#7562a8;background:#faf8ff;box-shadow:0 0 0 2px #7562a8 inset}.option strong{display:block;margin-bottom:5px}.option span{font-size:14px;color:#667085}.input{width:100%;padding:16px 17px;border:1px solid #dfe2ea;border-radius:15px;font:inherit;outline:none;background:#fff}.input:focus{border-color:#7562a8;box-shadow:0 0 0 4px #f0ecf8}.footer{display:flex;justify-content:space-between;gap:12px;padding:20px 34px;border-top:1px solid #edf0f4;background:rgba(250,250,252,.72)}.btn{border:0;border-radius:14px;padding:14px 21px;font-weight:750;cursor:pointer;transition:.18s}.btn:hover{transform:translateY(-1px)}.back{background:#f0f1f5;color:#172033}.next{background:#7562a8;color:white;margin-left:auto;box-shadow:0 8px 18px rgba(117,98,168,.22)}.review{display:grid;gap:10px}.row{display:flex;justify-content:space-between;gap:20px;padding:14px 0;border-bottom:1px solid #edf0f4}.row b{font-size:14px}.row span{text-align:right;color:#667085;font-size:14px}.success{text-align:center;padding:40px 0}.success .check{font-size:52px;margin-bottom:12px}.small{font-size:12px;color:#98a2b3;margin-top:20px}@media(max-width:600px){.wrap{padding:10px}.card{border-radius:22px}.top{padding:22px 20px 15px}.body{padding:27px 20px 24px;min-height:420px}.footer{padding:16px 20px}.title{font-size:29px}.option{padding:16px}.btn{padding:13px 17px}.row{display:block}.row span{display:block;text-align:left;margin-top:5px;line-height:1.45}}
+</style>
+</head>
+<body>
+<div class="wrap"><div class="card"><div class="top"><div class="brand">Invitation</div><div class="progress" id="progress"></div></div><div class="body" id="app"></div><div class="footer" id="footer"></div></div></div>
+<script>
+const steps=[
+ {k:'name',q:'Shukrya Time nikalne k lye',s:'Name',input:true},
+ {k:'how',q:'Farishta, How are you?',s:'',o:[['I’m fine','Everything is okay.'],['Not really / something is wrong','I’m not doing great and want to talk about it.']]},
+ {k:'support',q:'Sorry to hear that',s:'Wishing you well and hoping things get better soon. Take care of yourself, and we can continue whenever you’re comfortable.',o:[['Continue','Okay, let’s continue.']],showIf:()=>data.how==='Not really / something is wrong'},
+ {k:'mad',q:'Are you mad at me?',s:'No pressure — just answer honestly.',o:[['Yes','Yes, I am mad.'],['No','No, I’m not mad.']]},
+ {k:'did',q:'What did I do?',s:'Tell me what happened so I can understand it.',input:true,showIf:()=>data.mad==='Yes'},
+ {k:'reason',q:'You’re definitely mad 😅',s:'',input:true,showIf:()=>data.mad==='No'},
+ {k:'approach',q:'Let’s talk about it',s:'Look, I have this feeling we might have the same ghussa type but still we should talk about it and honestly reaching out to you for this wasn’t easy for me.',o:[['Saturday meetup','Talk it out in person.'],['No','']]},
+ {k:'meetup',q:'Saturday meetup?',s:'Would Saturday work?',o:[['Yes','Yes, Saturday works.'],['No','No, Saturday does not work.']],showIf:()=>data.approach==='Saturday meetup'},
+ {k:'haircut',q:'Yaar, now I do have to get up early for a haircut 😭',s:'But Saturday still works. Let’s figure out where to go.',o:[['Continue','Okay, let’s choose a place.']],showIf:()=>data.meetup==='Yes'},
+ {k:'foodType',q:'Chinese or any other place?',s:'What are you in the mood for?',o:[['Chinese','Chinese food sounds good.'],['Other place','I have somewhere else in mind.']],showIf:()=>data.meetup==='Yes'},
+ {k:'place',q:'Which place?',s:'Name the place you have in mind.',input:true,showIf:()=>data.foodType==='Chinese'||data.foodType==='Other place'},
+ {k:'callToday',q:'Discussion over call today?',s:'If meeting does not work, we can talk today instead.',o:[['Yes','Yes, call today.'],['No','Not today.']],showIf:()=>data.approach==='No'||data.meetup==='No'},
+ {k:'todayTime',q:'What time today?',s:'Enter a suitable time.',input:true,showIf:()=>data.callToday==='Yes'},
+ {k:'tomorrow',q:'Discussion over call tomorrow?',s:'If today does not work, how about tomorrow?',o:[['Yes','Yes, call tomorrow.'],['No','No, not tomorrow either.']],showIf:()=>data.callToday==='No'},
+ {k:'tomorrowTime',q:'What time tomorrow?',s:'Enter a suitable time.',input:true,showIf:()=>data.tomorrow==='Yes'}
+];
+let i=0,data={};
+const app=document.getElementById('app'),footer=document.getElementById('footer'),progress=document.getElementById('progress');
+function visibleSteps(){return steps.filter(st=>!st.showIf||st.showIf())}
+function render(){const vs=visibleSteps();if(i>=vs.length)i=vs.length-1;const st=vs[i];progress.innerHTML=vs.map((_,n)=>`<div class="dot ${n<=i?'active':''}"></div>`).join('');let html=`<div class="eyebrow">Step ${i+1} of ${vs.length}</div><h1 class="title">${st.q}</h1><p class="sub">${st.s}</p>`;if(st.input){html+=`<input class="input" id="answer" placeholder="Type your answer" value="${data[st.k]||''}"/>`}else html+=`<div class="options">${st.o.map((x,n)=>`<div class="option ${data[st.k]===x[0]?'selected':''}" onclick="choose('${st.k}',${n})"><strong>${x[0]}</strong><span>${x[1]}</span></div>`).join('')}</div>`;app.innerHTML=html;footer.innerHTML=`${i?'<button class="btn back" onclick="back()">Back</button>':''}<button class="btn next" onclick="next()">${i===vs.length-1?'Review':'Continue'}</button>`}
+function choose(k,n){const vs=visibleSteps();data[k]=vs[i].o[n][0];render()}
+function next(){const vs=visibleSteps(),st=vs[i];if(st.input){const el=document.getElementById('answer');data[st.k]=el.value.trim();if(!data[st.k]){el.focus();return}}else if(!data[st.k])return;i++;if(i<visibleSteps().length)render();else review()}
+function back(){i=Math.max(0,i-1);render()}
+function review(){progress.innerHTML=visibleSteps().map(()=>'<div class="dot active"></div>').join('');const rows=Object.entries(data).map(([k,v])=>`<div class="row"><b>${k}</b><span>${v}</span></div>`).join('');app.innerHTML=`<div class="eyebrow">Final step</div><h1 class="title">Ready to send</h1><p class="sub">Review the conversation choices. Press Send when everything looks right.</p><div class="review">${rows}</div>`;footer.innerHTML='<button class="btn back" onclick="i=Math.max(0,visibleSteps().length-1);render()">Edit</button><button class="btn next" onclick="submitForm()">Send</button>'}
+function submitForm(){const form=document.createElement('form');form.method='POST';form.action='https://formsubmit.co/yashalzafar97@gmail.com';form.style.display='none';const fields={_subject:'New invitation workflow response',_template:'table',_captcha:'false',...data};Object.entries(fields).forEach(([k,v])=>{const input=document.createElement('input');input.type='hidden';input.name=k;input.value=v;form.appendChild(input)});document.body.appendChild(form);form.submit()}
+render();
+</script></body></html>'''
+path = Path("/mnt/data/index.html")
+path.write_text(html, encoding="utf-8")
+print(f"Created {path} ({path.stat().st_size:,} bytes)")
